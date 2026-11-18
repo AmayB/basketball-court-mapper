@@ -1,5 +1,9 @@
 # Basketball Court Mapper
 
+<p align="center">
+  <img src="docs/demo.gif" alt="Dashboard: annotated broadcast, live tactical court, and stat tiles" width="420">
+</p>
+
 Turns a single broadcast basketball clip into tactical analytics and a dashboard video:
 the annotated broadcast on top, a live 2D tactical court in the middle, and four
 team-vs-team stat tiles at the bottom.
