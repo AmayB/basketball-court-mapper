@@ -1,4 +1,4 @@
-# hoopsvision
+# Basketball Court Mapper
 
 Turns a single broadcast basketball clip into tactical analytics and a dashboard video:
 the annotated broadcast on top, a live 2D tactical court in the middle, and four
