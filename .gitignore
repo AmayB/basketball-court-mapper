@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+out/
+scratch/
+samples/
+models/*.pt
+*.pt
+.remember/
+.pytest_cache/

@@ -1,0 +1,102 @@
+# hoopsvision sample config. Every key is optional; missing keys fall back to
+# the defaults in hoopsvision/config.py (which mirror this file).
+
+video:
+  start_frame: 0
+  max_frames: null          # null = whole clip
+
+models:
+  # Newest Ultralytics family at time of writing (YOLO26). Detection model finds
+  # people + ball; pose model only adds skeletons to matched person boxes.
+  detector_weights: models/yolo26s.pt
+  pose_weights: models/yolo26n-pose.pt   # null disables skeleton overlays
+  device: auto              # auto | cpu | cuda:0 | mps
+  imgsz: 1280               # 360p broadcast needs upscaled inference for recall
+  person_conf: 0.25
+  ball_conf: 0.15
+  pose_conf: 0.15
+  pose_match_iou: 0.45      # pose box <-> person box association
+  min_box_height_frac: 0.06 # drop tiny far-away crowd detections
+
+court:                      # NBA dimensions, feet
+  length_ft: 94.0
+  width_ft: 50.0
+  lane_width_ft: 16.0
+  ft_line_from_baseline_ft: 19.0
+  ft_circle_radius_ft: 6.0
+  center_circle_radius_ft: 6.0
+  hoop_from_baseline_ft: 5.25
+  three_pt_radius_ft: 23.75
+  three_pt_corner_offset_ft: 22.0   # distance of corner-three line from lane axis
+  on_court_margin_ft: 3.0           # foot points this far outside still count
+
+scenecut:
+  hist_bins: [30, 32]       # H, S bins
+  struct_threshold: 0.35    # equalized gradient correlation below this = cut
+  threshold: 0.5            # HSV Bhattacharyya distance ("colour jump")
+  hist_struct_threshold: 0.5  # colour jump only counts as a cut if corr is also below this
+  min_gap_frames: 10        # suppress double-triggers on dissolves
+
+tracking:
+  lost_track_buffer: 45     # frames a lost track is kept alive (occlusion)
+  track_activation_threshold: 0.25
+  high_conf_det_threshold: 0.4
+  minimum_consecutive_frames: 2
+  minimum_iou_threshold: 0.1
+  min_track_length: 8       # tracks shorter than this are discarded as noise
+
+teams:
+  labels: [HOME, AWAY]      # display names; no league branding is hard-coded
+  home_jersey: light        # light | dark: which jersey cluster is HOME
+  torso_x: [0.28, 0.72]     # fraction of bbox width
+  torso_y: [0.18, 0.50]     # fraction of bbox height (upper-middle)
+  court_color_dist: 14.0    # Lab distance; pixels this close to the floor are masked
+  min_pixels: 25
+  sample_every: 2           # extract jersey features every N frames
+  min_votes: 3
+  ref_min_share: 0.6        # share of referee-cluster votes needed to label a track referee
+
+calibration:
+  basket_side: auto         # auto | left | right (hypotheses scored by line fit)
+  paint_lab: null           # [L, a, b] in OpenCV 0-255 Lab; null = auto-estimate
+  paint_lab_tol: 22.0
+  ignore_regions: []        # extra [x0, y0, x1, y1] normalized boxes (graphics)
+  static_overlay_detect: true
+  icp_iterations: 4
+  icp_radius_px: [14, 9, 6, 4]
+  inlier_tol_px: 3.0
+  template_spacing_ft: 1.0
+  min_visible_template_pts: 60
+  smoothing_alpha: 0.35     # weight of the new measurement in the motion-compensated EMA
+  propagation_decay: 0.97   # per-frame confidence decay while propagating by camera motion
+  max_propagation_frames: 60  # unverified propagation fades to zero confidence over this many frames
+  paint_search_every: 3      # lane search cadence while confident (it is the slow part)
+  motion_method: lk         # lk (sparse optical flow + RANSAC) | ecc
+  low_conf_threshold: 0.45  # analytics are skipped below this
+  manual_anchors: []        # [{frame: 0, points: [[u, v, x_ft, y_ft], ...]}]
+
+metrics:
+  speed_window_s: 0.5
+  max_speed_kmh: 36.0       # elite sprint ~ 32-34 km/h; above this is a projection glitch
+  max_gap_frames: 6         # interpolate positions across gaps up to this length
+  min_players_for_hull: 3
+
+possession:
+  min_duration_s: 2.5
+  smoothing_s: 1.0
+  ball_assign_dist_ft: 4.0
+
+render:
+  width: 720
+  height: 900
+  title: BASKETBALL AI ANALYTICS
+  subtitle: Player tracking · Court mapping · Tactical metrics
+  team_colors: ["#3B82F6", "#D97706"]   # blue vs amber (validated: CVD-safe on the dark surface)
+  referee_color: "#9CA3AF"
+  background: "#0B1220"
+  court_bg: "#0F1B33"
+  stale_after_frames: 15    # tiles grey out when metrics are older than this
+
+output:
+  debug_video: true
+  h264: true                # use bundled ffmpeg (imageio-ffmpeg) when available
